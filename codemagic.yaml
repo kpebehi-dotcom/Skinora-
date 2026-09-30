@@ -1,0 +1,31 @@
+workflows:
+  ios-app-store:
+    name: Skinora iOS (App Store)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      groups:
+        - app_store_connect
+      vars:
+        BUNDLE_ID: "app.skinora.glow"
+      node: latest
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Installer les dépendances
+        script: |
+          npm install
+      - name: Compiler le projet web
+        script: |
+          npm run build
+      - name: Préparer iOS
+        script: |
+          npx cap add ios || true
+          npx cap sync ios
+      - name: Compiler l'archive iOS
+        script: |
+          xcode-project build-ipa \
+            --workspace "ios/App/App.xcworkspace" \
+            --scheme "App"
+    artifacts:
+      - build/ios/ipa/*.ipa
